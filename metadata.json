@@ -1,0 +1,6 @@
+{
+  "name": "Talk It Out! — Family Talk",
+  "description": "A gentle English speaking practice app for middle school students to resolve misunderstandings with parents calmly and rebuild communication bridges.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
