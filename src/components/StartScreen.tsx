@@ -13,9 +13,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto flex flex-col items-center justify-between min-h-[92vh] py-6 px-4">
+    <div className="w-full max-w-xl mx-auto flex flex-col items-center justify-between min-h-[86vh] py-4 px-4">
       {/* Top Header Section: Clean & Focused */}
-      <header className="w-full text-center space-y-2 pt-2">
+      <header className="w-full text-center space-y-2">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
           Talk It Out! <span className="text-amber-700 font-semibold block text-xl sm:text-2xl mt-0.5">Family Talk</span>
         </h1>

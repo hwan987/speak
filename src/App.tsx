@@ -3,14 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { PracticeScreen } from './components/PracticeScreen';
 import { ResultScreen } from './components/ResultScreen';
+import { AuthPage } from './components/AuthPage';
+import { UserMenu } from './components/UserMenu';
+import { LoginModal } from './components/LoginModal';
 import { DIALOGUE_TURNS, TurnProgress } from './types/dialogue';
+import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<'start' | 'practice' | 'result'>('start');
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const [currentScreen, setCurrentScreen] = useState<'start' | 'practice' | 'result' | 'auth'>(() => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/auth') {
+      return 'auth';
+    }
+    return 'start';
+  });
+
   const [currentTurnIndex, setCurrentTurnIndex] = useState<number>(0);
   const [turnProgress, setTurnProgress] = useState<TurnProgress[]>(() =>
     DIALOGUE_TURNS.map((t) => ({
@@ -31,6 +44,21 @@ export default function App() {
       }
     }
   }, []);
+
+  const handleGoHome = useCallback(() => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/auth') {
+      window.history.replaceState({}, '', '/');
+    }
+    setCurrentScreen('start');
+    setCurrentTurnIndex(0);
+  }, []);
+
+  // Redirect to main page once logged in
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && currentScreen === 'auth') {
+      handleGoHome();
+    }
+  }, [authLoading, isAuthenticated, currentScreen, handleGoHome]);
 
   const handleStartPractice = () => {
     setCurrentTurnIndex(0);
@@ -75,16 +103,17 @@ export default function App() {
     handleStartPractice();
   };
 
-  const handleGoHome = () => {
-    setCurrentScreen('start');
-    setCurrentTurnIndex(0);
-  };
-
   const completedCount = turnProgress.filter((p) => p.completed).length;
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-800 antialiased selection:bg-amber-200 selection:text-amber-900 font-sans">
       <div className="max-w-3xl mx-auto px-3 sm:px-6">
+        {currentScreen !== 'auth' && (
+          <div className="pt-3 pb-1">
+            <UserMenu onOpenLogin={() => setIsLoginOpen(true)} />
+          </div>
+        )}
+
         {currentScreen === 'start' && (
           <StartScreen onStart={handleStartPractice} />
         )}
@@ -101,6 +130,10 @@ export default function App() {
           />
         )}
 
+        {currentScreen === 'auth' && (
+          <AuthPage onBackHome={handleGoHome} />
+        )}
+
         {currentScreen === 'result' && (
           <ResultScreen
             turnProgress={turnProgress}
@@ -109,6 +142,11 @@ export default function App() {
           />
         )}
       </div>
+
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+      />
     </div>
   );
 }
